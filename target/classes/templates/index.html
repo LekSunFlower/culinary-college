@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Кулинарный колледж — Главная</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="container topbar-inner">
+        <a href="/site" class="logo">Кулинарный колледж</a>
+
+        <nav class="nav">
+            
+            <a class="nav-link" href="/site">Главная</a>
+
+            <a th:if="${#authorization.expression('hasRole(''STUDENT'')')}"
+               class="nav-link" href="/site/student/grades">
+                Мои оценки
+            </a>
+
+            <a th:if="${#authorization.expression('hasRole(''TEACHER'')')}"
+               class="nav-link" href="/site/teacher/grades">
+                Кабинет преподавателя
+            </a>
+
+            <a th:if="${#authentication.name == 'anonymousUser'}"
+               class="btn" href="/login">
+                Войти
+            </a>
+
+            <form th:if="${#authentication.name != 'anonymousUser'}"
+                  method="post" action="/logout">
+                <button class="btn btn-ghost">Выйти</button>
+            </form>
+
+        </nav>
+    </div>
+</header>
+
+<main>
+
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+
+        <div class="container hero-content">
+            <h1>Учебный кулинарный колледж</h1>
+            <p>
+                Практические занятия, авторские рецепты и реальные навыки
+                работы на кухне — от базовых техник до высокой кухни.
+            </p>
+
+            <div class="hero-actions">
+                <a href="/site/courses" class="btn">Смотреть курсы</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2>О колледже</h2>
+                <p>
+                    Мы готовим поваров, кондитеров и шеф-поваров, которые
+                    уверенно чувствуют себя как в учебной аудитории, так и
+                    на профессиональной кухне.
+                </p>
+            </div>
+
+            <div class="grid-3">
+                <div class="feature-card">
+                    <h3>Практика с первого дня</h3>
+                    <p>Каждый урок — это реальные техники, рецепты и работа с продуктами.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>Опытные преподаватели</h3>
+                    <p>Преподаватели — действующие шеф-повара и кондитеры.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>Оценки и прогресс</h3>
+                    <p>Студенты видят свои оценки и продвижение по каждому курсу.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Галерея студентов -->
+    <section id="gallery" class="section section-alt fullwidth-gallery">
+        <div class="section-header container">
+            <h2>Наши студенты</h2>
+            <p>Несколько кадров из учебного процесса и практических занятий.</p>
+        </div>
+
+        <div class="gallery-wide">
+            <div class="gallery-item"><div class="gallery-photo photo-1"></div></div>
+            <div class="gallery-item"><div class="gallery-photo photo-2"></div></div>
+            <div class="gallery-item"><div class="gallery-photo photo-3"></div></div>
+            <div class="gallery-item"><div class="gallery-photo photo-4"></div></div>
+            <div class="gallery-item"><div class="gallery-photo photo-5"></div></div>
+        </div>
+    </section>
+
+    <section id="courses" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Учебные курсы</h2>
+                <p>Небольшой список курсов, доступных в системе.</p>
+            </div>
+
+            <div class="cards">
+                <div class="card" th:each="course : ${courses}">
+                    <h3 th:text="${course.title}">Название курса</h3>
+                    <p th:text="${course.description}">Описание курса</p>
+
+                    <a class="btn-small" th:href="@{|/site/courses/${course.id}|}">
+                        Подробнее
+                    </a>
+                </div>
+
+                <p th:if="${#lists.isEmpty(courses)}">
+                    Курсы пока не добавлены. Обратитесь к администратору.
+                </p>
+            </div>
+
+            <div class="section-actions">
+                <a href="/site/courses" class="btn btn-ghost">Все курсы</a>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div class="container footer-inner">
+        <div class="footer-block">
+            <div class="logo logo-footer">Кулинарный колледж</div>
+        </div>
+        <div class="footer-block">
+            <div class="footer-title">Навигация</div>
+            <a href="/site#about">О нас</a>
+            <a href="/site#courses">Курсы</a>
+            <a href="/site/student/grades">Кабинет студента</a>
+        </div>
+        <div class="footer-block">
+            <div class="footer-title">Техподдержка</div>
+            <p>Обратитесь к преподавателю курса или администратору системы.</p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        © 2025 Кулинарный колледж
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Culinary College API</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        h1, h2, h3 { margin-bottom: 0.3em; }
+        .section { border: 1px solid #ccc; padding: 10px; margin-bottom: 15px; border-radius: 6px; }
+        .section-title { font-weight: bold; margin-bottom: 5px; }
+        label { display: inline-block; margin-top: 5px; }
+        input[type="text"] { width: 260px; }
+        textarea { width: 100%; height: 120px; font-family: monospace; }
+        button { margin: 2px 4px 2px 0; }
+        #output { background: #111; color: #0f0; padding: 10px; white-space: pre-wrap; border-radius: 6px; }
+    </style>
+</head>
+<body>
+<h1>Culinary College API</h1>
+
+<div class="section">
+    <div class="section-title">1. Авторизация (HTTP Basic)</div>
+    <p>
+        <b>admin/admin</b>, <b>teacher/teacher</b>, <b>student/student</b>
+    </p>
+    <button onclick="askCredentials()">Ввести логин/пароль</button>
+    <span id="authStatus" style="margin-left:10px;color:green;"></span>
+</div>
+
+<div class="section">
+    <div class="section-title">2. Быстрые GET-запросы (проверка доступа по ролям)</div>
+    <div>
+        <button onclick="callApi('GET', '/api/users')">GET /api/users (ADMIN)</button>
+        <button onclick="callApi('GET', '/api/students')">GET /api/students</button>
+        <button onclick="callApi('GET', '/api/teachers')">GET /api/teachers</button>
+    </div>
+    <div>
+        <button onclick="callApi('GET', '/api/courses')">GET /api/courses</button>
+        <button onclick="callApi('GET', '/api/lessons')">GET /api/lessons</button>
+    </div>
+    <div>
+        <button onclick="callApi('GET', '/api/recipes')">GET /api/recipes</button>
+        <button onclick="callApi('GET', '/api/ingredients')">GET /api/ingredients</button>
+        <button onclick="callApi('GET', '/api/grades')">GET /api/grades</button>
+    </div>
+
+    <hr>
+
+    <p>GET по ID (заполни ID и нажми):</p>
+    <div>
+        <label>User ID: <input id="userId" type="text" placeholder="1"></label>
+        <button onclick="callGetById('/api/users/', 'userId')">GET /api/users/{id}</button>
+    </div>
+    <div>
+        <label>Course ID: <input id="courseId" type="text" placeholder="1"></label>
+        <button onclick="callGetById('/api/courses/', 'courseId')">GET /api/courses/{id}</button>
+    </div>
+    <div>
+        <label>Lesson ID: <input id="lessonId" type="text" placeholder="1"></label>
+        <button onclick="callGetById('/api/lessons/', 'lessonId')">GET /api/lessons/{id}</button>
+    </div>
+    <div>
+        <label>Recipe ID: <input id="recipeId" type="text" placeholder="1"></label>
+        <button onclick="callGetById('/api/recipes/', 'recipeId')">GET /api/recipes/{id}</button>
+    </div>
+    <div>
+        <label>Ingredient ID: <input id="ingredientId" type="text" placeholder="1"></label>
+        <button onclick="callGetById('/api/ingredients/', 'ingredientId')">GET /api/ingredients/{id}</button>
+    </div>
+    <div>
+        <label>Grade ID: <input id="gradeId" type="text" placeholder="1"></label>
+        <button onclick="callGetById('/api/grades/', 'gradeId')">GET /api/grades/{id}</button>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-title">3. Универсальный запрос (любой метод + путь + JSON-тело)</div>
+
+    <label>
+        Метод:
+        <select id="methodSelect">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+            <option>DELETE</option>
+        </select>
+    </label>
+
+    <br>
+
+    <label>
+        Путь (относительно корня):
+        <input id="pathInput" type="text" value="/api/courses">
+    </label>
+
+    <br>
+
+    <label for="bodyInput">
+        JSON-тело (для POST/PUT; можно оставить пустым для GET/DELETE):
+    </label><br>
+    <textarea id="bodyInput" placeholder='Например: {"title":"New course","description":"Desc"}'></textarea>
+
+    <br>
+    <button onclick="sendCustom()">Отправить запрос</button>
+    <button onclick="fillExample('user')">Пример тела: User (POST)</button>
+    <button onclick="fillExample('course')">Пример тела: Course (POST)</button>
+    <button onclick="fillExample('lesson')">Пример тела: Lesson (POST)</button>
+    <button onclick="fillExample('student')">Пример тела: Student (POST)</button>
+</div>
+
+<div class="section">
+    <div class="section-title">4. Ответ сервера</div>
+    <pre id="output">Здесь будет выводиться ответ сервера (статус + тело JSON)</pre>
+</div>
+
+<script>
+    let authHeader = null;
+
+    function askCredentials() {
+        const username = prompt("Username:", "admin");
+        const password = prompt("Password:", "admin");
+        if (username && password) {
+            authHeader = "Basic " + btoa(username + ":" + password);
+            document.getElementById("authStatus").textContent =
+                "Текущий пользователь: " + username;
+        } else {
+            alert("Логин и пароль не заданы");
+        }
+    }
+
+    function ensureAuth() {
+        if (!authHeader) {
+            alert("Сначала нажми 'Ввести логин/пароль'");
+            return false;
+        }
+        return true;
+    }
+
+    function callApi(method, path, bodyObj) {
+        if (!ensureAuth()) return;
+
+        const options = {
+            method: method,
+            headers: {
+                "Authorization": authHeader,
+                "Accept": "application/json"
+            }
+        };
+
+        if (bodyObj !== undefined && bodyObj !== null &&
+            method !== "GET" && method !== "DELETE") {
+            options.headers["Content-Type"] = "application/json";
+            options.body = JSON.stringify(bodyObj);
+        }
+
+        fetch(path, options)
+            .then(async response => {
+                const raw = await response.text();
+                let parsed;
+                try {
+                    parsed = JSON.parse(raw);
+                } catch (e) {
+                    parsed = raw;
+                }
+
+                const out = document.getElementById("output");
+                out.textContent =
+                    "REQUEST: " + method + " " + path + "\n" +
+                    "STATUS: " + response.status + " " + response.statusText + "\n\n" +
+                    (typeof parsed === "string" ? parsed : JSON.stringify(parsed, null, 2));
+            })
+            .catch(err => {
+                document.getElementById("output").textContent =
+                    "REQUEST ERROR: " + err;
+            });
+    }
+
+    function callGetById(prefix, inputIdElementId) {
+        const id = document.getElementById(inputIdElementId).value.trim();
+        if (!id) {
+            alert("Сначала введи ID");
+            return;
+        }
+        callApi("GET", prefix + id);
+    }
+
+    function sendCustom() {
+        if (!ensureAuth()) return;
+
+        const method = document.getElementById("methodSelect").value;
+        const path = document.getElementById("pathInput").value.trim();
+        const bodyText = document.getElementById("bodyInput").value.trim();
+
+        let body = null;
+        if (bodyText.length > 0 && method !== "GET" && method !== "DELETE") {
+            try {
+                body = JSON.parse(bodyText);
+            } catch (e) {
+                alert("Ошибка парсинга JSON-тела: " + e);
+                return;
+            }
+        }
+
+        if (!path.startsWith("/")) {
+            alert("Путь должен начинаться с '/' (например, /api/courses)");
+            return;
+        }
+
+        callApi(method, path, body);
+    }
+
+    function fillExample(type) {
+        const area = document.getElementById("bodyInput");
+        if (type === "user") {
+            area.value = JSON.stringify({
+                "username": "newuser",
+                "password": "pass",
+                "role": "STUDENT"
+            }, null, 2);
+            document.getElementById("pathInput").value = "/api/users";
+            document.getElementById("methodSelect").value = "POST";
+        } else if (type === "course") {
+            area.value = JSON.stringify({
+                "title": "Basic Cooking",
+                "description": "Intro course",
+                "teacher": null
+            }, null, 2);
+            document.getElementById("pathInput").value = "/api/courses";
+            document.getElementById("methodSelect").value = "POST";
+        } else if (type === "lesson") {
+            area.value = JSON.stringify({
+                "title": "Lesson 1",
+                "content": "Some content",
+                "course": null
+            }, null, 2);
+            document.getElementById("pathInput").value = "/api/lessons";
+            document.getElementById("methodSelect").value = "POST";
+        } else if (type === "student") {
+            area.value = JSON.stringify({
+                "fullName": "Иван Иванов",
+                "user": {
+                    "id": 1
+                }
+            }, null, 2);
+
+            document.getElementById("pathInput").value = "/api/students";
+            document.getElementById("methodSelect").value = "POST";
+        }
+    }
+</script>
+</body>
+</html>

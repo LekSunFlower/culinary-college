@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои оценки</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+
+<body>
+
+<header class="subheader">
+    <h1>Оценки студента</h1>
+    <p>
+        Студент: <b th:text="${student.fullName}">Имя студента</b>
+    </p>
+    <a href="/site" class="link-back">← На главную</a>
+</header>
+
+<section class="section">
+    <table class="table">
+        <tr>
+            <th>Урок</th>
+            <th>Курс</th>
+            <th>Оценка</th>
+        </tr>
+        <tr th:each="grade : ${grades}">
+            <td th:text="${grade.lesson.title}">Урок</td>
+            <td th:text="${grade.lesson.course.title}">Курс</td>
+            <td th:text="${grade.value}">Оценка</td>
+        </tr>
+    </table>
+</section>
+
+<footer>
+    © 2025 Кулинарный колледж
+</footer>
+
+</body>
+</html>

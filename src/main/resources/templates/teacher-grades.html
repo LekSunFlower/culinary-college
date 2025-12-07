@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Кабинет преподавателя — Оценки</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="container topbar-inner">
+        <a href="/site" class="logo">Кулинарный колледж</a>
+
+        <nav class="nav">
+            <a class="nav-link" href="/site">Главная</a>
+            <a class="nav-link" href="/site/teacher/grades">Оценки</a>
+            <a class="nav-link" href="/site/teacher/manage">Курсы и рецепты</a>
+
+            <form method="post" action="/logout">
+                <button class="btn btn-ghost">Выйти</button>
+            </form>
+        </nav>
+
+    </div>
+</header>
+
+<main class="section">
+    <div class="container">
+
+        <div class="section-header">
+            <h2>Кабинет преподавателя</h2>
+            <p>Выберите курс, затем урок и выставьте оценки обучающимся.</p>
+        </div>
+
+        <div class="card">
+            <h3>Шаг 1 — выберите курс</h3>
+
+            <form method="get" action="/site/teacher/grades">
+                <select name="courseId" class="input">
+                    <option value="">— Выберите курс —</option>
+
+                    <option th:each="course : ${courses}"
+                            th:value="${course.id}"
+                            th:text="${course.title}">
+                    </option>
+                </select>
+
+                <button type="submit" class="btn-small">Открыть</button>
+            </form>
+
+            <div th:if="${selectedCourse}">
+                <p style="margin-top:10px;">
+                    <b th:text="${selectedCourse.title}"></b>
+                    — выбранный курс
+                </p>
+                <p th:text="${selectedCourse.description}"></p>
+            </div>
+        </div>
+
+
+        <div class="card" th:if="${selectedCourse}">
+            <h3>Шаг 2 — выберите урок внутри курса</h3>
+
+            <form method="get" action="/site/teacher/grades">
+                <input type="hidden" name="courseId" th:value="${selectedCourse.id}" />
+
+                <select name="lessonId" class="input">
+                    <option value="">— Выберите урок —</option>
+
+                    <option th:each="lesson : ${selectedCourse.lessons}"
+                            th:value="${lesson.id}"
+                            th:text="${lesson.title}">
+                    </option>
+                </select>
+
+                <button type="submit" class="btn-small">Открыть урок</button>
+            </form>
+
+            <div th:if="${selectedLesson}" style="margin-top:15px;">
+                <h4 th:text="${selectedLesson.title}"></h4>
+                <p th:text="${selectedLesson.content}"></p>
+            </div>
+        </div>
+
+        <div class="card" th:if="${selectedLesson}">
+            <h3>Шаг 3 — выставьте оценку</h3>
+
+            <form th:action="@{|/site/teacher/grades/${selectedLesson.id}/set|}" method="post">
+
+                <label>Студент:</label>
+                <select class="input" name="studentId">
+                    <option th:each="student : ${students}"
+                            th:value="${student.id}"
+                            th:text="${student.fullName}">
+                    </option>
+                </select>
+
+                <label>Оценка:</label>
+                <select class="input" name="value">
+                    <option th:each="i : ${#numbers.sequence(1, 5)}"
+                            th:value="${i}"
+                            th:text="${i}">
+                    </option>
+                </select>
+
+                <br/><br/>
+                <button type="submit" class="btn">Сохранить оценку</button>
+            </form>
+
+        </div>
+
+        <div class="card" th:if="${selectedLesson}">
+            <h3>Выставленные оценки</h3>
+
+            <table class="styled-table">
+                <thead>
+                <tr>
+                    <th>Студент</th>
+                    <th>Оценка</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="g : ${grades}">
+                    <td th:text="${g.student.fullName}"></td>
+                    <td th:text="${g.value}"></td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(grades)}">
+                    <td colspan="2">Еще не выставлено оценок</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div style="margin-top:10px;" th:if="${!#lists.isEmpty(grades)}">
+                <p>Всего оценок:
+                    <b th:text="${grades.size()}"></b>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+</body>
+</html>

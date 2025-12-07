@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${recipe.title}">Рецепт</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+
+<body>
+
+<header class="subheader">
+    <h1 th:text="${recipe.title}">Название рецепта</h1>
+    <a th:href="@{|/site/lessons/${recipe.lesson.id}|}" class="link-back">
+        ← Назад к уроку
+    </a>
+</header>
+
+<section class="section">
+    <h2>Ингредиенты</h2>
+
+    <ul class="list">
+        <li th:each="ri : ${recipeIngredients}">
+            <span th:text="${ri.ingredient.name}"></span> —
+            <span th:text="${ri.quantity}"></span>
+            <span th:text="${ri.ingredient.unit}"></span>
+        </li>
+    </ul>
+
+    <h2>Инструкция</h2>
+    <p th:utext="${#strings.replace(recipe.instructions, '\n', '<br/>')}"></p>
+</section>
+
+<footer>
+    © 2025 Кулинарный колледж
+</footer>
+
+</body>
+</html>

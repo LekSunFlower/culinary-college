@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${course.title}">Курс</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+
+<body>
+
+<header class="subheader">
+    <h1 th:text="${course.title}">Название курса</h1>
+    <p th:text="${course.description}">Описание</p>
+    <a href="/site/courses" class="link-back">← Все курсы</a>
+</header>
+
+<section class="section">
+    <h2>Уроки</h2>
+
+    <ul class="list">
+        <li th:each="lesson : ${lessons}">
+            <a th:href="@{|/site/lessons/${lesson.id}|}"
+               th:text="${lesson.title}">Урок</a>
+        </li>
+    </ul>
+</section>
+
+<footer>
+    © 2025 Кулинарный колледж
+</footer>
+
+</body>
+</html>

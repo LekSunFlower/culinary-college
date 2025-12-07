@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Кабинет преподавателя — Управление</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="container topbar-inner">
+        <a href="/site" class="logo">Кулинарный колледж</a>
+
+        <nav class="nav">
+            <a class="nav-link" href="/site">Главная</a>
+            <a class="nav-link" href="/site/teacher/grades">Оценки</a>
+            <a class="nav-link" href="/site/teacher/manage">Курсы и рецепты</a>
+
+            <form method="post" action="/logout">
+                <button class="btn btn-ghost">Выйти</button>
+            </form>
+        </nav>
+
+    </div>
+</header>
+
+<main class="section">
+    <div class="container">
+
+        <div class="section-header">
+            <h2>Кабинет преподавателя</h2>
+            <p>Управление курсами, уроками и рецептами.</p>
+        </div>
+
+        <div class="card">
+            <h3>Шаг 1 — выберите или создайте курс</h3>
+
+            <form method="get" action="/site/teacher/manage">
+                <select name="courseId" class="input">
+                    <option value="">— Выберите курс —</option>
+
+                    <option th:each="course : ${courses}"
+                            th:value="${course.id}"
+                            th:text="${course.title}">
+                    </option>
+                </select>
+
+                <button type="submit" class="btn-small">Открыть</button>
+            </form>
+
+            <form action="/site/teacher/courses/create" method="post" style="margin-top:10px;">
+                <input class="input" name="title" placeholder="Название курса">
+                <input class="input" name="description" placeholder="Описание курса">
+
+                <button class="btn-small">Создать курс</button>
+            </form>
+
+            <div th:if="${selectedCourse}">
+                <p style="margin-top:10px;">
+                    <b th:text="${selectedCourse.title}"></b>
+                    — выбранный курс
+                </p>
+                <p th:text="${selectedCourse.description}"></p>
+            </div>
+        </div>
+
+        <div class="card" th:if="${selectedCourse}">
+            <h3>Шаг 2 — выберите или создайте урок</h3>
+
+            <form method="get" action="/site/teacher/manage">
+                <input type="hidden" name="courseId" th:value="${selectedCourse.id}" />
+
+                <select name="lessonId" class="input">
+                    <option value="">— Выберите урок —</option>
+
+                    <option th:each="lesson : ${lessons}"
+                            th:value="${lesson.id}"
+                            th:text="${lesson.title}">
+                    </option>
+                </select>
+
+                <button type="submit" class="btn-small">Открыть урок</button>
+            </form>
+
+            <form action="/site/teacher/lessons/create" method="post" style="margin-top:10px;">
+                <input type="hidden" name="courseId" th:value="${selectedCourse.id}" />
+
+                <input class="input" name="title" placeholder="Название урока">
+                <input class="input" name="content" placeholder="Краткое содержание">
+
+                <button class="btn-small">Добавить урок</button>
+            </form>
+
+            <div th:if="${selectedLesson}" style="margin-top:10px;">
+                <h4 th:text="${selectedLesson.title}"></h4>
+                <p th:text="${selectedLesson.content}"></p>
+            </div>
+        </div>
+
+        <div class="card" th:if="${selectedLesson}">
+            <h3>Шаг 3 — рецепты урока</h3>
+
+            <ul>
+                <li th:each="r : ${recipes}" th:text="${r.title}"></li>
+
+                <li th:if="${#lists.isEmpty(recipes)}">
+                    Рецептов пока нет
+                </li>
+            </ul>
+
+            <form action="/site/teacher/recipes/create" method="post" style="margin-top:10px;">
+
+                <input type="hidden" name="lessonId" th:value="${selectedLesson.id}" />
+
+                <input class="input" name="title" placeholder="Название рецепта">
+
+                <textarea class="textarea" name="description" rows="8" placeholder="Подробные шаги приготовления..."></textarea>
+
+                <button class="btn-small">Добавить рецепт</button>
+            </form>
+
+        </div>
+
+    </div>
+</main>
+
+</body>
+</html>
